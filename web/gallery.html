@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AsciiWall Settings</title>
+<link rel="icon" href="icon.png">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --bg: #0a0c11; --panel: #11141b; --panel2: #161a23; --line: #222735; --txt: #e9ecf3; --mut: #8d95a8;
+    --acc: #7cf0c9; --accd: rgba(124,240,201,.14);
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f2f4f8; --panel: #ffffff; --panel2: #f6f7fa; --line: #dfe3ec; --txt: #141824; --mut: #667086; --acc: #0f9d78; --accd: rgba(15,157,120,.12); }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--txt); font: 14px/1.45 "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  header { display: flex; align-items: center; gap: 14px; padding: 22px 28px 8px; max-width: 1560px; margin: 0 auto; flex-wrap: wrap; }
+  h1 { margin: 0; font: 600 20px/1 "Cascadia Mono", Consolas, monospace; letter-spacing: .02em; }
+  h1 span { color: var(--acc); }
+  .sub { color: var(--mut); }
+  .search { margin-left: auto; background: var(--panel); color: var(--txt); border: 1px solid var(--line); border-radius: 9px; padding: 7px 12px; font: inherit; width: 210px; }
+  .chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--mut); display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .chip i { width: 7px; height: 7px; border-radius: 50%; background: #e0a43a; }
+  .chip.live i { background: var(--acc); box-shadow: 0 0 8px var(--acc); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; padding: 14px 28px 40px; max-width: 1560px; margin: 0 auto; align-items: start; }
+  @media (max-width: 980px) { main { grid-template-columns: 1fr; } aside { position: static !important; } }
+  #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; color: inherit; font: inherit; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; position: relative; }
+  .card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--a) 70%, var(--line)); box-shadow: 0 8px 28px -12px var(--a); }
+  .card:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .card canvas { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+  .meta { display: flex; align-items: center; gap: 9px; padding: 10px 12px 11px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--a, var(--acc)); flex: none; }
+  .name { font-weight: 600; }
+  .pill { margin-left: auto; font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--accd); color: var(--acc); display: none; }
+  .card.on { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc); }
+  .card.on .pill { display: block; }
+  .star { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border-radius: 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(8,10,16,.55); color: rgba(255,255,255,.7); cursor: pointer; font-size: 14px; line-height: 1; display: grid; place-items: center; backdrop-filter: blur(6px); opacity: 0; transition: opacity .12s; }
+  .card:hover .star, .card:focus-within .star, .star.on { opacity: 1; }
+  .star.on { color: #0a0c11; background: var(--acc); border-color: var(--acc); }
+  .star:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; opacity: 1; }
+  aside { position: sticky; top: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px 18px; max-height: calc(100vh - 32px); overflow: auto; }
+  .now canvas { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: #000; border: 1px solid var(--line); }
+  .nowbar { display: flex; align-items: center; gap: 9px; margin: 10px 0 2px; }
+  .grow { flex: 1; }
+  .ib { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--txt); font: 600 15px/1 inherit; cursor: pointer; }
+  .ib:hover { border-color: var(--acc); color: var(--acc); }
+  .ib:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  aside h2 { font: 600 11px/1 "Segoe UI Variable Text", "Segoe UI", sans-serif; letter-spacing: .09em; text-transform: uppercase; color: var(--mut); margin: 22px 0 10px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 9px 0; }
+  .row label { color: var(--txt); }
+  .seg { display: flex; flex-wrap: wrap; background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 2px; gap: 2px; justify-content: flex-end; }
+  .seg button { border: 0; background: transparent; color: var(--mut); padding: 5px 10px; border-radius: 7px; font: inherit; cursor: pointer; }
+  .seg button.on { background: var(--accd); color: var(--acc); }
+  .seg button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+  select { background: var(--panel2); color: var(--txt); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font: inherit; }
+  input[type=range] { width: 150px; accent-color: var(--acc); }
+  .sw { position: relative; width: 38px; height: 22px; flex: none; }
+  .sw input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .sw b { position: absolute; inset: 0; background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; transition: .15s; pointer-events: none; }
+  .sw b::after { content: ""; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--mut); left: 2px; top: 2px; transition: .15s; }
+  .sw input:checked + b { background: var(--accd); border-color: var(--acc); }
+  .sw input:checked + b::after { background: var(--acc); transform: translateX(16px); }
+  .sw input:focus-visible + b { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .hint { color: var(--mut); font-size: 12px; margin-top: 12px; line-height: 1.55; }
+  .link { background: none; border: 0; color: var(--acc); font: inherit; cursor: pointer; padding: 0; }
+  kbd { font: 12px "Cascadia Mono", Consolas, monospace; background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; }
+  .hide { display: none !important; }
+  .empty { grid-column: 1 / -1; color: var(--mut); padding: 30px 0; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ASCII<span>/</span>WALL</h1>
+  <div class="sub">Pick a scene. It changes on your desktop right away.</div>
+  <input class="search" id="search" type="search" placeholder="Search scenes" aria-label="Search scenes">
+  <div class="chip" id="chip"><i></i><span id="chipText">Preview</span></div>
+</header>
+<main>
+  <section id="grid" aria-label="Scenes"></section>
+  <aside aria-label="Settings">
+    <div class="now">
+      <canvas id="pv" width="640" height="360"></canvas>
+      <div class="nowbar">
+        <span class="dot" id="nowDot"></span><b id="nowName"></b><span class="grow"></span>
+        <button class="ib" id="bPrev" title="Previous scene" aria-label="Previous scene">&#8249;</button>
+        <button class="ib" id="bRand" title="Surprise me" aria-label="Random scene">&#10542;</button>
+        <button class="ib" id="bNext" title="Next scene" aria-label="Next scene">&#8250;</button>
+      </div>
+    </div>
+    <div id="panel"></div>
+  </aside>
+</main>
+
+<script src="engine.js"></script>
+<script src="scenes-classic.js"></script>
+<script src="scenes-more.js"></script>
+<script src="user-scenes.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search), token = params.get('k') || '', connected = false;
+  var state = {
+    scene: 'ember', screens: [], mode: 'mirror', fps: 30, detail: 1, speed: 1, dim: 0,
+    tint: 'none', hue: 0, sat: 1,
+    clock: 'off', clockSize: 1, clock24: false, clockDate: true, rotate: 0, shuffle: false, playlist: [],
+    pauseCovered: true, paused: false, battery: 'limit', hotkeys: true, startup: false, onBattery: false,
+    monitors: [], stats: null, version: ''
+  };
+  var target = 'all', dragging = false;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function post(patch) {
+    if (!token) return;
+    fetch('/api/set?k=' + encodeURIComponent(token), { method: 'POST', body: JSON.stringify(patch) }).catch(function () {});
+  }
+  function set(patch) { for (var k in patch) state[k] = patch[k]; refresh(); post(patch); }
+
+  /* ---- scene library ---- */
+  function inPool(slug) { return !state.playlist.length || state.playlist.indexOf(slug) >= 0; }
+  function pool() { return SCENES.map(function (s) { return s.slug; }).filter(inPool); }
+
+  var cards = [];
+  SCENES.forEach(function (sc, n) {
+    var el = document.createElement('div');
+    el.className = 'card'; el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', sc.name);
+    el.style.setProperty('--a', sc.accent);
+    el.innerHTML = '<canvas width="480" height="270"></canvas><div class="meta"><span class="dot"></span><span class="name"></span><span class="pill">Active</span></div>' +
+      '<button class="star" type="button" title="Include in auto-change" aria-label="Include in auto-change">&#9733;</button>';
+    el.querySelector('.name').textContent = sc.name;
+    el.addEventListener('click', function () { choose(sc.slug); });
+    el.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target === el) { e.preventDefault(); choose(sc.slug); } });
+    var star = el.querySelector('.star');
+    star.addEventListener('click', function (e) { e.stopPropagation(); togglePool(sc.slug); });
+    $('grid').appendChild(el);
+    cards.push({ el: el, star: star, canvas: el.querySelector('canvas'), ctx: el.querySelector('canvas').getContext('2d', { alpha: false }), sc: sc, seen: false, off: hash(n * 7.7) * 60 + 10 });
+  });
+  window.__gallery = { cards: cards, state: state };
+  var empty = document.createElement('div'); empty.className = 'empty hide'; empty.textContent = 'No scene matches that search.';
+  $('grid').appendChild(empty);
+  /* which cards are on screen: a cheap rectangle test a few times a second beats an observer here */
+  var lastSeen = 0;
+  function updateSeen(now) {
+    if (now - lastSeen < 250) return;
+    lastSeen = now;
+    var vh = innerHeight + 160;
+    for (var i = 0; i < cards.length; i++) {
+      var r = cards[i].el.getBoundingClientRect();
+      cards[i].seen = r.bottom > -160 && r.top < vh && r.width > 0;
+    }
+  }
+
+  $('search').addEventListener('input', function () {
+    var q = this.value.trim().toLowerCase(), shown = 0;
+    cards.forEach(function (c) { var ok = !q || c.sc.name.toLowerCase().indexOf(q) >= 0; c.el.classList.toggle('hide', !ok); if (ok) shown++; });
+    empty.classList.toggle('hide', shown > 0);
+  });
+
+  function choose(slug) {
+    if (target === 'all') set({ scene: slug, screens: [] });
+    else { var s = (state.screens || []).slice(); while (s.length < state.monitors.length) s.push(''); s[target] = slug; set({ screens: s }); }
+  }
+  function activeSlug() {
+    if (target === 'all' || state.mode === 'span') return state.scene;
+    return (state.screens && state.screens[target]) || state.scene;
+  }
+  function togglePool(slug) {
+    var all = SCENES.map(function (s) { return s.slug; });
+    var cur = state.playlist.length ? state.playlist.slice() : all.slice();
+    var i = cur.indexOf(slug);
+    if (i >= 0) { if (cur.length > 1) cur.splice(i, 1); } else cur.push(slug);
+    if (cur.length === all.length) cur = [];
+    set({ playlist: cur });
+  }
+  function step(dir) {
+    var p = pool(); if (!p.length) return;
+    var i = p.indexOf(state.scene);
+    set({ scene: p[i < 0 ? 0 : (i + dir + p.length) % p.length], screens: [] });
+  }
+  $('bPrev').addEventListener('click', function () { step(-1); });
+  $('bNext').addEventListener('click', function () { step(1); });
+  $('bRand').addEventListener('click', function () {
+    var p = pool().filter(function (s) { return s !== state.scene; });
+    if (p.length) set({ scene: p[Math.floor(Math.random() * p.length)], screens: [] });
+  });
+
+  /* Cards animate gently while this window has focus and freeze when it does not, so leaving it open costs nothing. */
+  var last = 0, lastPv = 0;
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (document.hidden) return;
+    var t = now / 1000, focus = document.hasFocus();
+    updateSeen(now);
+    if (now - lastPv >= (focus ? 50 : 400)) {
+      lastPv = now;
+      var sc = findScene(activeSlug()) || SCENES[0];
+      renderScene($('pv').getContext('2d', { alpha: false }), sc, 640, 360, t, { rows: 44 });
+    }
+    if (now - last < 90) return;
+    last = now;
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      if (c.seen && (focus || !c.drawn)) { renderScene(c.ctx, c.sc, 480, 270, t + c.off, { rows: 30 }); c.drawn = true; }
+    }
+  }
+  requestAnimationFrame(loop);
+
+  /* ---- settings panel ---- */
+  function seg(opts, value, fn) {
+    var d = document.createElement('div'); d.className = 'seg';
+    opts.forEach(function (o) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = o[1];
+      if (String(o[0]) === String(value)) b.className = 'on';
+      b.addEventListener('click', function () { fn(o[0]); });
+      d.appendChild(b);
+    });
+    return d;
+  }
+  function row(label, ctl) { var r = document.createElement('div'); r.className = 'row'; var l = document.createElement('label'); l.textContent = label; r.appendChild(l); r.appendChild(ctl); return r; }
+  function toggle(value, fn) {
+    var w = document.createElement('span'); w.className = 'sw';
+    var i = document.createElement('input'); i.type = 'checkbox'; i.checked = !!value; i.addEventListener('change', function () { fn(i.checked); });
+    w.appendChild(i); w.appendChild(document.createElement('b')); return w;
+  }
+  function select(opts, value, fn) {
+    var s = document.createElement('select');
+    opts.forEach(function (o) { var p = document.createElement('option'); p.value = o[0]; p.textContent = o[1]; if (String(o[0]) === String(value)) p.selected = true; s.appendChild(p); });
+    s.addEventListener('change', function () { fn(s.value); });
+    return s;
+  }
+  /* sliders apply while you drag (throttled), like a live preview */
+  function range(min, max, step, value, fn) {
+    var r = document.createElement('input'); r.type = 'range'; r.min = min; r.max = max; r.step = step; r.value = value;
+    var timer = 0;
+    r.addEventListener('pointerdown', function () { dragging = true; });
+    r.addEventListener('input', function () {
+      dragging = true;
+      if (timer) return;
+      timer = setTimeout(function () { timer = 0; fn(+r.value); }, 90);
+    });
+    r.addEventListener('change', function () { dragging = false; clearTimeout(timer); timer = 0; fn(+r.value); });
+    return r;
+  }
+  function h2(t) { var h = document.createElement('h2'); h.textContent = t; return h; }
+
+  function buildPanel() {
+    var p = $('panel'); p.textContent = '';
+    var mons = state.monitors || [];
+    if (mons.length > 1) {
+      p.appendChild(h2('Screens'));
+      var opts = [['all', 'All']].concat(mons.map(function (m, i) { return [i, 'Screen ' + (i + 1)]; }));
+      if (state.mode === 'span') opts = [['all', 'All']];
+      p.appendChild(row('Change', seg(opts, target, function (v) { target = v === 'all' ? 'all' : +v; refresh(); })));
+      p.appendChild(row('Layout', seg([['mirror', 'Each screen'], ['span', 'Span']], state.mode, function (v) { if (v === 'span') target = 'all'; set({ mode: v }); })));
+    }
+    p.appendChild(h2('Auto-change'));
+    p.appendChild(row('Change scene every', select([[0, 'Never'], [1, '1 min'], [5, '5 min'], [15, '15 min'], [30, '30 min'], [60, '1 hour']], state.rotate, function (v) { set({ rotate: +v }); })));
+    p.appendChild(row('Shuffle', toggle(state.shuffle, function (v) { set({ shuffle: v }); })));
+    var pl = document.createElement('div'); pl.className = 'hint';
+    if (state.playlist.length) {
+      pl.appendChild(document.createTextNode('Rotating through ' + state.playlist.length + ' of ' + SCENES.length + ' scenes. '));
+      var all = document.createElement('button'); all.className = 'link'; all.type = 'button'; all.textContent = 'Use all'; all.addEventListener('click', function () { set({ playlist: [] }); });
+      pl.appendChild(all);
+    } else pl.textContent = 'Rotating through all scenes. Click the star on a scene to choose which ones take part.';
+    p.appendChild(pl);
+
+    p.appendChild(h2('Look'));
+    p.appendChild(row('Detail', seg([[0, 'Soft'], [1, 'Balanced'], [2, 'Sharp']], state.detail, function (v) { set({ detail: +v }); })));
+    p.appendChild(row('Speed', range(0.25, 2, 0.05, state.speed, function (v) { set({ speed: v }); })));
+    p.appendChild(row('Brightness', range(40, 100, 1, Math.round((1 - state.dim) * 100), function (v) { set({ dim: +(1 - v / 100).toFixed(2) }); })));
+
+    p.appendChild(h2('Color'));
+    p.appendChild(row('Style', select([['none', 'Original'], ['mono', 'Monochrome'], ['phosphor', 'Green phosphor'], ['amber', 'Amber terminal'], ['ice', 'Ice'], ['rose', 'Rose']], state.tint, function (v) { set({ tint: v }); })));
+    if (state.tint === 'none') p.appendChild(row('Hue shift', range(0, 359, 1, state.hue, function (v) { set({ hue: v }); })));
+    p.appendChild(row('Saturation', range(0, 1.6, 0.05, state.sat, function (v) { set({ sat: v }); })));
+
+    p.appendChild(h2('Clock'));
+    p.appendChild(row('Position', select([['off', 'Off'], ['center', 'Center'], ['top-right', 'Top right'], ['bottom-right', 'Bottom right'], ['bottom-center', 'Bottom center']], state.clock, function (v) { set({ clock: v }); })));
+    if (state.clock !== 'off') {
+      p.appendChild(row('Size', seg([[1, 'S'], [2, 'M'], [3, 'L']], state.clockSize, function (v) { set({ clockSize: +v }); })));
+      p.appendChild(row('24-hour', toggle(state.clock24, function (v) { set({ clock24: v }); })));
+      p.appendChild(row('Show date', toggle(state.clockDate, function (v) { set({ clockDate: v }); })));
+    }
+
+    p.appendChild(h2('Performance'));
+    p.appendChild(row('Frame rate', seg([[15, '15'], [24, '24'], [30, '30'], [60, '60']], state.fps, function (v) { set({ fps: +v }); })));
+    p.appendChild(row('Pause when covered', toggle(state.pauseCovered, function (v) { set({ pauseCovered: v }); })));
+    p.appendChild(row('On battery', select([['normal', 'Run normally'], ['limit', 'Limit to 15 fps'], ['pause', 'Pause']], state.battery, function (v) { set({ battery: v }); })));
+    p.appendChild(row('Pause wallpaper', toggle(state.paused, function (v) { set({ paused: v }); })));
+
+    p.appendChild(h2('General'));
+    p.appendChild(row('Start with Windows', toggle(state.startup, function (v) { set({ startup: v }); })));
+    p.appendChild(row('Keyboard shortcuts', toggle(state.hotkeys, function (v) { set({ hotkeys: v }); })));
+    var hint = document.createElement('div'); hint.className = 'hint';
+    hint.innerHTML = 'Shortcuts: <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Shift</kbd> + <kbd>&rarr;</kbd> next, <kbd>&larr;</kbd> previous, <kbd>R</kbd> random, <kbd>P</kbd> pause.<br>The wallpaper stops drawing while a maximised window or a full-screen game covers the screen, and on a locked session, so it costs nothing while you work.';
+    p.appendChild(hint);
+  }
+
+  var panelKey = '';
+  function refresh() {
+    var act = activeSlug(), sc = findScene(act) || SCENES[0];
+    cards.forEach(function (c) {
+      c.el.classList.toggle('on', c.sc.slug === act);
+      var on = inPool(c.sc.slug);
+      c.star.classList.toggle('on', on && state.playlist.length > 0);
+      c.star.title = on ? 'In auto-change (click to remove)' : 'Add to auto-change';
+    });
+    $('nowName').textContent = sc.name; $('nowDot').style.setProperty('--a', sc.accent);
+    var key = JSON.stringify([state.monitors, state.mode, state.rotate, state.shuffle, state.playlist, state.detail, state.tint, state.clock, state.clockSize, state.clock24, state.clockDate, state.fps, state.pauseCovered, state.paused, state.battery, state.hotkeys, state.startup, target, state.speed, state.dim, state.hue, state.sat]);
+    if (!dragging && key !== panelKey) { panelKey = key; buildPanel(); }
+    var chip = $('chip'), st = state.stats;
+    chip.classList.toggle('live', connected);
+    $('chipText').textContent = connected
+      ? 'Connected' + (st ? '  ·  CPU ' + st.cpu.toFixed(1) + '%  ·  ' + st.mem + ' MB' : '')
+      : 'Preview only. Open this page from the tray icon to control the wallpaper.';
+  }
+
+  if (token) {
+    var es = new EventSource('/api/events?k=' + encodeURIComponent(token));
+    es.onopen = function () { connected = true; refresh(); };
+    es.onerror = function () { connected = false; refresh(); };
+    es.onmessage = function (e) { try { var s = JSON.parse(e.data); for (var k in s) state[k] = s[k]; refresh(); } catch (err) { /* ignore */ } };
+  }
+  refresh();
+})();
+</script>
+</body>
+</html>
