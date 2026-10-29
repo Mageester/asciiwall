@@ -36,7 +36,7 @@ namespace AsciiWall
     {
         public string Scene = "dunes";
         public List<string> Screens = new List<string>();
-        public string Mode = "mirror";
+        public string Mode = "span";
         public int Fps = 24, Detail = 1, ClockSize = 1, Rotate = 0, Hue = 0;
         public double Speed = 1.0, Dim = 0.0, Sat = 1.0;
         public string Clock = "off", Tint = "none", Battery = "limit";

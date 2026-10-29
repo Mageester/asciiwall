@@ -42,7 +42,7 @@ namespace AsciiWall
     public sealed class Host
     {
         public const string Version = "1.0.0";
-        public const string RepoUrl = "";
+        public const string RepoUrl = "https://github.com/Mageester/asciiwall";
 
         public readonly string AppDir, DataDir, WebDir, ConfigPath, ScenesPath, ExePath;
         public Config Cfg;

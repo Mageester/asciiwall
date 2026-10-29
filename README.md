@@ -35,7 +35,7 @@ That compiles with the .NET Framework C# compiler and writes `dist\AsciiWall-Set
 | | |
 |---|---|
 | Scenes | 17 built in, each with its own palette and glyphs; add your own (below) |
-| Monitors | each screen on its own scene, the same scene on all, or one scene spanning every screen |
+| Monitors | one scene spanning every screen by default (a jellyfish that swims off the edge of one monitor appears on the next), or each screen on its own scene |
 | Auto-change | every 1, 5, 15, 30 or 60 minutes, in order or shuffled, over all scenes or just the starred ones |
 | Look | detail (soft, balanced, sharp), speed, brightness |
 | Color | original, monochrome, green phosphor, amber terminal, ice, rose; plus hue shift and saturation |

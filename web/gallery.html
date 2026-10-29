@@ -101,7 +101,7 @@
 (function () {
   var params = new URLSearchParams(location.search), token = params.get('k') || '', connected = false;
   var state = {
-    scene: 'ember', screens: [], mode: 'mirror', fps: 30, detail: 1, speed: 1, dim: 0,
+    scene: 'ember', screens: [], mode: 'span', fps: 30, detail: 1, speed: 1, dim: 0,
     tint: 'none', hue: 0, sat: 1,
     clock: 'off', clockSize: 1, clock24: false, clockDate: true, rotate: 0, shuffle: false, playlist: [],
     pauseCovered: true, paused: false, battery: 'limit', hotkeys: true, startup: false, onBattery: false,
